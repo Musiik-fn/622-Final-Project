@@ -38,13 +38,15 @@ def linearSearchIterative(sourceList, target):
     Args:
         sourceList (list): A list of `int` values
         target (int): The `int` value that will be searched for
-    Retuns:
-        If the `target` is found, the index of the `sourceList` is returned. `False` is returned if otherwise
+    Retuns a `tuple`:
+        (target or False, iterations). If the `target` is found, the index of the `sourceList` is returned. `False` is returned if otherwise
     """
+    iterations = 0
     for index, each in enumerate(sourceList):
+        iterations += 1
         if each == target:
-            return index
-    return False
+            return index, iterations
+    return False, iterations
 
 def linearSearchRecursive(sourceList, target, index=0):
     """Finds the target within the `sourceList` using the linear search method recursively. 
@@ -67,9 +69,12 @@ def binarySearchIterative(sourceList, target):
     Args:
         sourceList (list): A list of `int` values
         target (int): The `int` value that will be searched for
+    Retuns a `tuple`:
+        (target or False, iterations). If the `target` is found, the index of the `sourceList` is returned. `False` is returned if otherwise
     """
     left = 0
     right = len(sourceList) - 1
+    iterations = 0
 
     if target == sourceList[left]:
         return left
@@ -78,14 +83,15 @@ def binarySearchIterative(sourceList, target):
     else:
         while left <= right: # ensures that there are numbers in between to still go through
             midpoint_index = (left + right) // 2
+            iterations += 1
             if target == sourceList[midpoint_index]:
-                return midpoint_index
+                return midpoint_index, iterations
             elif target < sourceList[midpoint_index]:
                 right = midpoint_index - 1
             else: 
                 left = midpoint_index + 1
 
-        return False
+        return False, iterations
 
 def binarySearchRecursive(sourceList, target, left=0, right=None):
     """Uses binary search to find the target within a sorted list. Returns the position of the target, if found, and `False` otherwise. Uses a recursive approach.
@@ -153,7 +159,7 @@ def main():
         # Ask user if they want to continue or exit
         continue_choice = input("---\nThat was exciting! Do you want to perform another search? Enter 'yes' to continue or 'no' to exit: ").strip().lower()
         if continue_choice != 'yes':
-            print("Exiting program and shutting off all mission systems. Enjoy the rest of your day, and thanks for everything, Professor Pouyan. We hope to see you again in the next semesters.")
+            print(f"[Electrical powering down noises...]\nShutting down script. Enjoy the rest of your day, and thanks for everything, Professor Pouyan. We hope to see you again in the next semesters.")
             break
 
 if __name__ == '__main__':
