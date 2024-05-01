@@ -77,9 +77,9 @@ def binarySearchIterative(sourceList, target):
     iterations = 0
 
     if target == sourceList[left]:
-        return left
+        return left, iterations
     elif target == sourceList[right]:
-        return right
+        return right, iterations
     else:
         while left <= right: # ensures that there are numbers in between to still go through
             midpoint_index = (left + right) // 2
