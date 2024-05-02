@@ -55,7 +55,7 @@ Where $d$ is the discount rate chosen by the firm. Additionally, loyalty will di
 
 $$\frac{\$ M_1 * p_1}{(1+d)^1} + \frac{\$ M_2 * p_2}{(1+d)^2} + \frac{\$ M_3 * p_3}{(1+d)^3} + \ldots$$
 
-where $p$ is the probability that a consumer will buy in a given time period (which in turn is derived from retention rate, $r$). Let's assume that there is a $0.9$ probability that a consumer will make a purchase in time period $t$, given that he bought in $t-1$. Thus, we can derivate the probabilities by:
+where $p$ is the probability that a consumer will buy in a given time period (which in turn is derived from retention rate, $r$). Let's assume that there is a $0.9$ probability that a consumer will make a purchase in time period $t$, given that he bought in $t-1$. Thus, we can derive the probabilities by:
 
 $$p(1) = r(1) = 0.90$$
 $$p(2) = r(1)*r(2) = 0.9^2$$
