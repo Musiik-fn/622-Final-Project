@@ -24,11 +24,11 @@ The Customer Lifetime Value (CLV) is calculated as:
 $$ CLV = M \times \frac{r}{1 + d - r} $$
 
 #### Variables Description:
-- **\( M \)**: **Margin per Customer**. This is calculated as \( \text{Price} - \text{Unit Variable Cost} \). For your example, this would be $350. This represents the profit from each purchase, assuming the cost to provide the product or service is subtracted from the price at which it's sold.
+- **$M$**: **Margin per Customer**. This is calculated as $\text{Price} - \text{Unit Variable Cost}$. 
 
-- **\( r \)**: **Retention Rate**. This is the probability that a customer will return to make another purchase in the next period. In your example, this rate is 0.9 (or 90%), indicating a high likelihood that a customer will continue to buy annually.
+- **$r$**: **Retention Rate**. This is the probability that a customer will return to make another purchase in the next period. 
 
-- **\( d \)**: **Discount Rate**. This rate is used to discount the value of future cash flows to present value. It reflects the time value of money, indicating how much future revenues are worth today. The choice of \( d \) depends on the cost of capital or an estimated rate that reflects the firm's opportunity cost of capital.
+- **$d$**: **Discount Rate**. This rate is used to discount the value of future cash flows to present value. It reflects the time value of money, indicating how much future revenues are worth today. The choice of $d$ depends on the cost of capital or an estimated rate that reflects the firm's opportunity cost of capital.
 
 ### Function Design
 - The script will calculate CLV using both an iterative and a recursive method to evaluate the benefits of each approach.
