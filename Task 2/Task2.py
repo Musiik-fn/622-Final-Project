@@ -1,6 +1,8 @@
 import os
 import pandas as pd
 import sqlite3
+import numpy as np
+from datetime import datetime
 
 def initializeDatabaseInstance():
     '''
@@ -47,57 +49,63 @@ def initializeDatabaseConnection():
     
 
 def getUniqueCustomers():
-    """Generates a list of the unique characters from the sales database table. 
-
-    Returns:
-        `list`: Unique sales customers
-    """
+    """Generates a list of the unique customers from the sales database table."""
     conn, cursor = initializeDatabaseConnection()
     data = pd.read_sql_query('SELECT * FROM sales_data', con=conn)
     conn.close()
     return data['CUSTOMERNAME'].unique().tolist()
 
 def getMetricsIterative():
-    """Calculates the following sales metrics: average quantities of orders, average life span, average total profit, average profit margin 
-
-    Returns:
-        `dict`: Dictionary which contains meanOrderAmount, meanLifespan, meanTotalProfit, and meanProfitMargin
-    """
+    """Calculates key sales metrics."""
     customerList = getUniqueCustomers()
     conn, cursor = initializeDatabaseConnection()
     data = pd.read_sql_query('SELECT * FROM sales_data', con=conn)
     data['ORDERDATE'] = pd.to_datetime(data['ORDERDATE'])
     conn.close()
-    
 
     results = {}
     for eachCustomer in customerList:
         customer_data = data[data['CUSTOMERNAME'] == eachCustomer].copy()
         orderAmount = customer_data.shape[0]
-        lifespan = (customer_data['ORDERDATE'].max() - customer_data['ORDERDATE'].min()).days
+        lifespan_days = (customer_data['ORDERDATE'].max() - customer_data['ORDERDATE'].min()).days
         total_profit = (customer_data['SALES'] - (customer_data['MSRP'] * customer_data['QUANTITYORDERED'])).sum()
         
         if orderAmount > 0:
+            profit_per_order = total_profit / orderAmount
             customer_data['MARGIN'] = (customer_data['SALES'] - (customer_data['MSRP'] * customer_data['QUANTITYORDERED'])) / customer_data['SALES']
             profitMargin = customer_data['MARGIN'].mean()
         else:
+            profit_per_order = 0
             profitMargin = 0  
         
-        results[eachCustomer] = {'orderAmount': orderAmount, 'lifespan': lifespan, 'totalProfit': total_profit, 'profitMargin': profitMargin}
+        results[eachCustomer] = {
+            'orderAmount': orderAmount,
+            'lifespanDays': lifespan_days,
+            'totalProfit': total_profit,
+            'profitMargin': profitMargin,
+            'profitPerOrder': profit_per_order
+        }
 
     mean_metrics = {
-        'meanOrderAmount': sum(item['orderAmount'] for item in results.values()) / len(results),
-        'meanLifespan': sum(item['lifespan'] for item in results.values()) / len(results),
-        'meanTotalProfit': sum(item['totalProfit'] for item in results.values()) / len(results),
-        'meanProfitMargin': sum(item['profitMargin'] for item in results.values()) / len(results)
+        'meanOrderAmount': np.mean([item['orderAmount'] for item in results.values()]),
+        'meanLifespanDays': np.mean([item['lifespanDays'] for item in results.values()]),
+        'meanTotalProfit': np.mean([item['totalProfit'] for item in results.values()]),
+        'meanProfitMargin': np.mean([item['profitMargin'] for item in results.values()]),
+        'meanProfitPerOrder': np.mean([item['profitPerOrder'] for item in results.values()])
     }
 
-    return mean_metrics  
+    return mean_metrics
 
 def getCLV_Iterative():
-    
+    metrics = getMetricsIterative()
+    avg_profit_per_order = metrics['meanProfitPerOrder']
+    avg_order_frequency = metrics['meanOrderAmount'] / (metrics['meanLifespanDays'] / 365)  # convert lifespan to years
+    avg_lifespan_years = metrics['meanLifespanDays'] / 365
 
-    return
+    clv = avg_profit_per_order * avg_order_frequency * avg_lifespan_years
+
+    return clv
+
 
 
 def getCLV_Recursive():
