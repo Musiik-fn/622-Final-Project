@@ -10,7 +10,6 @@ def initializeDatabaseInstance():
     '''
     script_dir = os.path.dirname(__file__)
     salesCSV = os.path.join(script_dir, 'sales_data_sampleUTF8.csv')
-
     data = pd.read_csv(salesCSV, encoding='ISO-8859-1')
 
     db_path = os.path.join(script_dir,'sales_db.sqlite')
@@ -21,10 +20,8 @@ def initializeDatabaseInstance():
     table_name = 'sales_data'  
     cursor.execute(f"CREATE TABLE IF NOT EXISTS {table_name} ({columns})")
     conn.commit()
-
     data.to_sql(table_name, conn, if_exists='replace', index=False)  
 
-    
     print('Database initialized. Displaying first 5 records of `sales_data` table:')
     cursor.execute(f"SELECT * FROM {table_name} LIMIT 5")  
     rows = cursor.fetchall()
@@ -49,14 +46,22 @@ def initializeDatabaseConnection():
     
 
 def getUniqueCustomers():
-    """Generates a list of the unique customers from the sales database table."""
+    """Generates a list of the unique customers from the sales database table.
+
+    Returns:
+        `list`: List of the unique customers from the sales database table.
+    """
     conn, cursor = initializeDatabaseConnection()
     data = pd.read_sql_query('SELECT * FROM sales_data', con=conn)
     conn.close()
     return data['CUSTOMERNAME'].unique().tolist()
 
 def getMetricsIterative():
-    """Calculates key sales metrics."""
+    """Calculates the following sales metrics: average quantities of orders, average life span, average total profit, average profit margin 
+
+    Returns:
+        `dict`: Dictionary which contains meanOrderAmount, meanLifespan, meanTotalProfit, and meanProfitMargin
+    """
     customerList = getUniqueCustomers()
     conn, cursor = initializeDatabaseConnection()
     data = pd.read_sql_query('SELECT * FROM sales_data', con=conn)
@@ -93,24 +98,81 @@ def getMetricsIterative():
         'meanProfitMargin': np.mean([item['profitMargin'] for item in results.values()]),
         'meanProfitPerOrder': np.mean([item['profitPerOrder'] for item in results.values()])
     }
-
     return mean_metrics
 
 def getCLV_Iterative():
+    """Calculates customer lifetime value using average metrics from the entire sales table.
+
+    Returns:
+        `float`: Customer lifetime value.
+    """
     metrics = getMetricsIterative()
     avg_profit_per_order = metrics['meanProfitPerOrder']
     avg_order_frequency = metrics['meanOrderAmount'] / (metrics['meanLifespanDays'] / 365)  # convert lifespan to years
     avg_lifespan_years = metrics['meanLifespanDays'] / 365
 
     clv = avg_profit_per_order * avg_order_frequency * avg_lifespan_years
-
     return clv
 
 
 
-def getCLV_Recursive():
+def getMetricsRecursive(data, customerList, index=0, results=None):
+    if results is None:
+        results = {}
+    if index >= len(customerList):
+        mean_metrics = {
+            'meanOrderAmount': np.mean([item['orderAmount'] for item in results.values()]),
+            'meanLifespanDays': np.mean([item['lifespanDays'] for item in results.values()]),
+            'meanTotalProfit': np.mean([item['totalProfit'] for item in results.values()]),
+            'meanProfitMargin': np.mean([item['profitMargin'] for item in results.values()]),
+            'meanProfitPerOrder': np.mean([item['profitPerOrder'] for item in results.values()])
+        }
+        return mean_metrics
+    else:
+        customer_data = data[data['CUSTOMERNAME'] == customerList[index]].copy()
+        orderAmount = customer_data.shape[0]
+        lifespan_days = (customer_data['ORDERDATE'].max() - customer_data['ORDERDATE'].min()).days
+        total_profit = (customer_data['SALES'] - (customer_data['MSRP'] * customer_data['QUANTITYORDERED'])).sum()
 
-    return
+        if orderAmount > 0:
+            profit_per_order = total_profit / orderAmount
+            customer_data['MARGIN'] = (customer_data['SALES'] - (customer_data['MSRP'] * customer_data['QUANTITYORDERED'])) / customer_data['SALES']
+            profitMargin = customer_data['MARGIN'].mean()
+        else:
+            profit_per_order = 0
+            profitMargin = 0
+
+        results[customerList[index]] = {
+            'orderAmount': orderAmount,
+            'lifespanDays': lifespan_days,
+            'totalProfit': total_profit,
+            'profitMargin': profitMargin,
+            'profitPerOrder': profit_per_order
+        }
+
+        return getMetricsRecursive(data, customerList, index + 1, results)
+
+def getCLV_Recursive(metrics):
+    avg_profit_per_order = metrics['meanProfitPerOrder']
+    avg_order_frequency = metrics['meanOrderAmount'] / (metrics['meanLifespanDays'] / 365)
+    avg_lifespan_years = metrics['meanLifespanDays'] / 365
+
+    return avg_profit_per_order * avg_order_frequency * avg_lifespan_years
+
+def mainRecursive():
+    customerList = getUniqueCustomers()
+    conn, cursor = initializeDatabaseConnection()
+    data = pd.read_sql_query('SELECT * FROM sales_data', con=conn)
+    data['ORDERDATE'] = pd.to_datetime(data['ORDERDATE'])
+    conn.close()
+
+    metrics = getMetricsRecursive(data, customerList)
+    clv =  getCLV_Recursive(metrics)
+    return clv
+
+# Call mainRecursive function to get the CLV
+clv = mainRecursive()
+print(f"Recursive CLV Calculation: {clv}")
 
 
 def getCLV_SQL():
