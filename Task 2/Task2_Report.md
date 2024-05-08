@@ -44,37 +44,14 @@ Where:
 
 $$ \text{CLV} = \text{Mean Profit Per Order} \times \left( \frac{\text{Mean Order Amount}}{\text{Mean Lifespan Days} / 365} \right) \times \left( \frac{\text{Mean Lifespan Days}}{365} \right) $$
 
+## Programming
 
-Our program follows a simple function design and we adhered to the practice of one function does one thing. 
+Our program follows a simple function design and we adhered to the practice of one function does one thing. Below is the design flow chart:
 ![Function Design Flow Chart](Task2_Functions_Flow.svg)
 
----
-
-### Function: `initializeDatabaseInstance()`
-**Description:**  
-Initializes an SQLite database instance in the repository, imports data from a CSV file, creates a table named `sales_data`, and fills it with the CSV data.
-
-**Arguments:**  
-None
-
-**Returns:**  
-None
+This document will not detail the `SQL` or helper DB API functions. If you wish to see details related to them, see their source code here: ([GitHub](https://github.com/Musiik-fn/622-Final-Project/blob/main/Task%202/Task2.py))
 
 ---
-
-### Function: `initializeDatabaseConnection()`
-**Description:**  
-Initializes an SQLite connection and cursor to the sales database. User still has to close the database connection after use with `conn.close()`.
-
-**Arguments:**  
-None
-
-**Returns:**  
-- `conn`: Connection to the database.
-- `cursor`: Cursor for database operations.
-
----
-
 ### Function: `getUniqueCustomers()`
 **Description:**  
 Generates a list of unique customers from the `sales_data` table in the database.
@@ -137,41 +114,6 @@ Calculates the Customer Lifetime Value (CLV) using metrics provided, processed r
 - `float`: Customer Lifetime Value.
 
 ---
-
-### Function: `getUniqueCustomersSQL()`
-**Description:**  
-Fetches a distinct list of customer names directly from the SQL database using a DISTINCT query.
-
-**Arguments:**  
-None
-
-**Returns:**  
-- `list`: List of unique customer names from the sales database.
-
----
-
-### Function: `getMetricsIterativeSQL()`
-**Description:**  
-Directly computes sales metrics using SQL queries to perform aggregation functions. This method utilizes SQL to calculate and return average order amounts, lifespan days, total profit, and profit margins for each customer.
-
-**Arguments:**  
-None
-
-**Returns:**  
-- `dict`: Dictionary containing average values of order amounts, lifespan days, total profit, and profit margins.
-
----
-
-### Function: `getCLV_IterativeSQL()`
-**Description:**  
-Calculates the Customer Lifetime Value (CLV) using aggregated metrics obtained directly from SQL queries
-
-**Arguments:**  
-None
-
-**Returns:**  
-- `float`: Customer Lifetime Value.
-
 ---
 
 
