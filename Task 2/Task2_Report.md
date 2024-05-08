@@ -256,5 +256,6 @@ However, we do believe the recursion would be useful in the CLV formula with ret
 
 
 # Conclusion 
-Conclude with your recommendation on which version to use and under what circumstances.
+We do not believe that this problem is feasible to solve recursively. Given our experience and intution from the work we have done related to this project, an iterative approach seems like it would always be the first choice. Although the recursive solution works in our implementation, we are working with a relatively small dataset. As soon as you begin to work with any real CRM with millions of rows and records, you will reach recursion depth limit. Overall, the iteartive approach is more readible, performs better, is more robust, and therefore is the better tool for this job. Possibly in different CLV formulas, recursion is better, but we would say this is still not the case. 
 
+As a closing remark, we believe that this project was particularly engaging as it integrated concepts from across our entire curriculum. We combined elements of programming, testing and validation, marketing, data visualization, and database management to create a solution to a problem. This approach highlighted the interconnectedness of these things we have been taught, providing a glimpse of how diverse skills converge in real-world applications. It was rewarding to see how the knowledge acquired in our various courses came together in this project, offering a practical perspective on the synthesis of technology and business strategies.
