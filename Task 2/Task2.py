@@ -117,9 +117,20 @@ def getCLV_Iterative():
 
 
 def getMetricsRecursive(data, customerList, index=0, results=None):
+    """Using recursive methods, calculates the following sales metrics: average quantities of orders, average life span, average total profit, average profit margin.
+
+    Args:
+        data (`DataFrame`): The customer sales data table, in the d type of `DataFrame`
+        customerList (`list`): The unique list of customers. This list will be filled with the `getUniqueCustomer()` function.
+        index (int, optional): Tracks if the function has iterated through the customer list. Should not be changed. Defaults to 0.
+        results (`dict`, optional): Stores results. Should not be changed. Defaults to None.
+
+    Returns:
+        `dict`: Dictionary which contains meanOrderAmount, meanLifespan, meanTotalProfit, and meanProfitMargin
+    """
     if results is None:
         results = {}
-    if index >= len(customerList):
+    if index >= len(customerList): # checks if the recursion has processed all customers. If index is equal to or greater than the length of customerList, it computes the average (mean) of all metrics collected in the results dictionary and returns them.
         mean_metrics = {
             'meanOrderAmount': np.mean([item['orderAmount'] for item in results.values()]),
             'meanLifespanDays': np.mean([item['lifespanDays'] for item in results.values()]),
@@ -175,6 +186,47 @@ clv = mainRecursive()
 print(f"Recursive CLV Calculation: {clv}")
 
 
-def getCLV_SQL():
+def getUniqueCustomersSQL():
+    """Generates a list of the unique customers from the sales database table."""
+    conn, cursor = initializeDatabaseConnection()
+    query = 'SELECT DISTINCT CUSTOMERNAME FROM sales_data'
+    customer_data = pd.read_sql_query(query, con=conn)
+    conn.close()
+    return customer_data['CUSTOMERNAME'].tolist()
 
-    return
+def getMetricsIterativeSQL():
+    """Calculates sales metrics using SQL aggregation functions directly."""
+    conn, cursor = initializeDatabaseConnection()
+    
+    # Query to calculate metrics for each customer directly in SQL
+    query = '''
+    SELECT CUSTOMERNAME, COUNT(*) AS orderAmount, 
+        DATEDIFF(MAX(ORDERDATE), MIN(ORDERDATE)) AS lifespanDays,
+        SUM(SALES - MSRP * QUANTITYORDERED) AS totalProfit,
+        AVG((SALES - MSRP * QUANTITYORDERED) / SALES) AS profitMargin
+    FROM sales_data
+    GROUP BY CUSTOMERNAME
+    '''
+    
+    results = pd.read_sql_query(query, con=conn)
+    conn.close()
+
+    # Calculating mean of the metrics from the results
+    mean_metrics = {
+        'meanOrderAmount': results['orderAmount'].mean(),
+        'meanLifespanDays': results['lifespanDays'].mean(),
+        'meanTotalProfit': results['totalProfit'].mean(),
+        'meanProfitMargin': results['profitMargin'].mean()
+    }
+    
+    return mean_metrics
+
+def getCLV_IterativeSQL():
+    """Calculates customer lifetime value using average metrics from the entire sales table."""
+    metrics = getMetricsIterative()
+    avg_profit_per_order = metrics['meanTotalProfit'] / metrics['meanOrderAmount']
+    avg_order_frequency = metrics['meanOrderAmount'] / (metrics['meanLifespanDays'] / 365)
+    avg_lifespan_years = metrics['meanLifespanDays'] / 365
+
+    clv = avg_profit_per_order * avg_order_frequency * avg_lifespan_years
+    return clv
