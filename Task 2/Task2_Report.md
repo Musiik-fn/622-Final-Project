@@ -54,7 +54,7 @@ This document will not detail the `SQL` or helper DB API functions. If you wish 
 ---
 ### Function: `getUniqueCustomers()`
 **Description:**  
-Generates a list of unique customers from the `sales_data` table in the database.
+Generates a list of unique customers from the `sales_data` table in the database. Opens a connection to DB, stores DB table into a Pandas `DataFrame`, then fetches the unique customers using Pandas `.unique()`. 
 
 **Arguments:**  
 None
@@ -62,11 +62,20 @@ None
 **Returns:**  
 - `list`: List of unique customers from the sales database table.
 
+```Python
+def getUniqueCustomers():
+    conn, cursor = initializeDatabaseConnection()
+    data = pd.read_sql_query('SELECT * FROM sales_data', con=conn)
+    conn.close()
+    return data['CUSTOMERNAME'].unique().tolist()
+```
 ---
 
 ### Function: `getMetricsIterative()`
 **Description:**  
-Calculates average quantities of orders, lifespan, total profit, and profit margin for each unique customer in the sales database.
+Calculates average quantities of orders, lifespan, total profit, and profit margin for each unique customer in the sales database. A list of unqiue customers is ititialized using the function above. Opens a connection to the DB, stores the DB table into a Pandas `DataFrame`. Field `ORDERDATE` is switched to a Pandas `DateTime`. 
+
+The function iterates through each customer in the `customerList` with a `for` loop. This loop calculates the amount of orders, the lifespan of the customer, the total amount of profit they have generated, and their profit margin. Each customer's results are stored into a `dict`, then we use NumPy to find the mean of each numerical field.
 
 **Arguments:**  
 None
@@ -74,11 +83,52 @@ None
 **Returns:**  
 - `dict`: Dictionary containing `meanOrderAmount`, `meanLifespanDays`, `meanTotalProfit`, and `meanProfitMargin`.
 
+```Python
+def getMetricsIterative():
+    customerList = getUniqueCustomers()
+    conn, cursor = initializeDatabaseConnection()
+    data = pd.read_sql_query('SELECT * FROM sales_data', con=conn)
+    data['ORDERDATE'] = pd.to_datetime(data['ORDERDATE'])
+    conn.close()
+
+    results = {}
+    for eachCustomer in customerList:
+        customer_data = data[data['CUSTOMERNAME'] == eachCustomer].copy()
+        orderAmount = customer_data.shape[0]
+        lifespan_days = (customer_data['ORDERDATE'].max() - customer_data['ORDERDATE'].min()).days
+        total_profit = (customer_data['SALES'] - (customer_data['MSRP'] * customer_data['QUANTITYORDERED'])).sum()
+        
+        if orderAmount > 0:
+            profit_per_order = total_profit / orderAmount
+            customer_data['MARGIN'] = (customer_data['SALES'] - (customer_data['MSRP'] * customer_data['QUANTITYORDERED'])) / customer_data['SALES']
+            profitMargin = customer_data['MARGIN'].mean()
+        else:
+            profit_per_order = 0
+            profitMargin = 0  
+        
+        results[eachCustomer] = {
+            'orderAmount': orderAmount,
+            'lifespanDays': lifespan_days,
+            'totalProfit': total_profit,
+            'profitMargin': profitMargin,
+            'profitPerOrder': profit_per_order
+        }
+
+    mean_metrics = {
+        'meanOrderAmount': np.mean([item['orderAmount'] for item in results.values()]),
+        'meanLifespanDays': np.mean([item['lifespanDays'] for item in results.values()]),
+        'meanTotalProfit': np.mean([item['totalProfit'] for item in results.values()]),
+        'meanProfitMargin': np.mean([item['profitMargin'] for item in results.values()]),
+        'meanProfitPerOrder': np.mean([item['profitPerOrder'] for item in results.values()])
+    }
+    return mean_metrics
+
+```
 ---
 
 ### Function: `getCLV_Iterative()`
 **Description:**  
-Calculates the Customer Lifetime Value (CLV) using average metrics calculated from the entire sales database.
+Calculates the Customer Lifetime Value (CLV) using average metrics calculated from the entire sales database. A simple product per our definition of CLV above.
 
 **Arguments:**  
 None
@@ -86,11 +136,24 @@ None
 **Returns:**  
 - `float`: Customer Lifetime Value.
 
+```Python
+def getCLV_Iterative():
+    metrics = getMetricsIterative()
+    avg_profit_per_order = metrics['meanProfitPerOrder']
+    avg_order_frequency = metrics['meanOrderAmount'] / (metrics['meanLifespanDays'] / 365)  # convert lifespan to years
+    avg_lifespan_years = metrics['meanLifespanDays'] / 365
+
+    clv = avg_profit_per_order * avg_order_frequency * avg_lifespan_years
+    return clv
+```
+
 ---
 
 ### Function: `getMetricsRecursive(data, customerList, index=0, results=None)`
 **Description:**  
-Recursively calculates sales metrics such as average order quantities, lifespan, total profit, and profit margin. This function processes customers one at a time recursively, accumulating results.
+Recursively calculates sales metrics such as average order quantities, lifespan, total profit, and profit margin. This function processes customers one at a time recursively, accumulating results. This function, unlike it's iterative counterpart, has some arguments. These arguments are essential in the iterative function because we will increment our `index` after each recursive call, and that `index` points to which customer to calculate metrics for within the `customerList`. 
+
+Our base case is when the `index` value is equal to or greater than the length of the `customerList`. At this point, we have the program calculuate the aggregate means similar to the iterative function. 
 
 **Arguments:**  
 - `data` (`DataFrame`): Customer sales data table.
@@ -101,6 +164,54 @@ Recursively calculates sales metrics such as average order quantities, lifespan,
 **Returns:**  
 - `dict`: Dictionary containing `meanOrderAmount`, `meanLifespanDays`, `meanTotalProfit`, and `meanProfitMargin`.
 
+```Python
+def getMetricsRecursive(data, customerList, index=0, results=None):
+    """Using recursive methods, calculates the following sales metrics: average quantities of orders, average life span, average total profit, average profit margin.
+
+    Args:
+        data (`DataFrame`): The customer sales data table, in the d type of `DataFrame`
+        customerList (`list`): The unique list of customers. This list will be filled with the `getUniqueCustomer()` function.
+        index (int, optional): Tracks if the function has iterated through the customer list. Should not be changed. Defaults to 0.
+        results (`dict`, optional): Stores results. Should not be changed. Defaults to None.
+
+    Returns:
+        `dict`: Dictionary which contains meanOrderAmount, meanLifespan, meanTotalProfit, and meanProfitMargin
+    """
+    if results is None:
+        results = {}
+    if index >= len(customerList): # checks if the recursion has processed all customers. If index is equal to or greater than the length of customerList, it computes the average (mean) of all metrics collected in the results dictionary and returns them.
+        mean_metrics = {
+            'meanOrderAmount': np.mean([item['orderAmount'] for item in results.values()]),
+            'meanLifespanDays': np.mean([item['lifespanDays'] for item in results.values()]),
+            'meanTotalProfit': np.mean([item['totalProfit'] for item in results.values()]),
+            'meanProfitMargin': np.mean([item['profitMargin'] for item in results.values()]),
+            'meanProfitPerOrder': np.mean([item['profitPerOrder'] for item in results.values()])
+        }
+        return mean_metrics
+    else:
+        customer_data = data[data['CUSTOMERNAME'] == customerList[index]].copy()
+        orderAmount = customer_data.shape[0]
+        lifespan_days = (customer_data['ORDERDATE'].max() - customer_data['ORDERDATE'].min()).days
+        total_profit = (customer_data['SALES'] - (customer_data['MSRP'] * customer_data['QUANTITYORDERED'])).sum()
+
+        if orderAmount > 0:
+            profit_per_order = total_profit / orderAmount
+            customer_data['MARGIN'] = (customer_data['SALES'] - (customer_data['MSRP'] * customer_data['QUANTITYORDERED'])) / customer_data['SALES']
+            profitMargin = customer_data['MARGIN'].mean()
+        else:
+            profit_per_order = 0
+            profitMargin = 0
+
+        results[customerList[index]] = {
+            'orderAmount': orderAmount,
+            'lifespanDays': lifespan_days,
+            'totalProfit': total_profit,
+            'profitMargin': profitMargin,
+            'profitPerOrder': profit_per_order
+        }
+
+        return getMetricsRecursive(data, customerList, index + 1, results)
+```
 ---
 
 ### Function: `getCLV_Recursive(metrics)`
@@ -113,7 +224,14 @@ Calculates the Customer Lifetime Value (CLV) using metrics provided, processed r
 **Returns:**  
 - `float`: Customer Lifetime Value.
 
----
+```Python
+def getCLV_Recursive(metrics):
+    avg_profit_per_order = metrics['meanProfitPerOrder']
+    avg_order_frequency = metrics['meanOrderAmount'] / (metrics['meanLifespanDays'] / 365)
+    avg_lifespan_years = metrics['meanLifespanDays'] / 365
+
+    return avg_profit_per_order * avg_order_frequency * avg_lifespan_years
+```
 ---
 
 
