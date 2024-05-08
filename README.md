@@ -6,4 +6,4 @@ Clone this repository to your local machine to inspect the code in your own IDE.
 git clone https://github.com/Musiik-fn/622-Final-Project.git
 ```
 
-Please navigate to https://github.com/Musiik-fn/622-Final-Project/wiki to view the work related to each task.
+Please navigate to https://github.com/Musiik-fn/622-Final-Project/wiki to view the work and reports related to each task.
