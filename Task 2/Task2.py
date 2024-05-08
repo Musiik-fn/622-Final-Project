@@ -1,3 +1,27 @@
+# === Documentation and Testing ===
+# Code Documentation
+# TODO: Document both functions thoroughly explaining purpose, inputs, outputs, and functionality.
+# Testing
+# TODO: Write test cases for both functions to demonstrate correctness and efficiency.
+
+# === Performance Analysis ===
+# Metrics
+# TODO: Evaluate both function versions based on execution time, memory usage, and computational complexity.
+# Comparison
+# TODO: Analyze and discuss differences in performance between the iterative and recursive implementations.
+
+# === Report ===
+# Introduction
+# TODO: Write an introduction in the report detailing the function and its significance in the chosen domain.
+# Methodology
+# TODO: Describe the methodology of both implementations in detail.
+# Results
+# TODO: Present the performance analysis results.
+# Discussion
+# TODO: Discuss the benefits and limitations of each implementation style.
+# Conclusion
+# TODO: Conclude which version is recommended and under what circumstances.
+
 import os
 import pandas as pd
 import sqlite3
@@ -170,22 +194,6 @@ def getCLV_Recursive(metrics):
 
     return avg_profit_per_order * avg_order_frequency * avg_lifespan_years
 
-def mainRecursive():
-    customerList = getUniqueCustomers()
-    conn, cursor = initializeDatabaseConnection()
-    data = pd.read_sql_query('SELECT * FROM sales_data', con=conn)
-    data['ORDERDATE'] = pd.to_datetime(data['ORDERDATE'])
-    conn.close()
-
-    metrics = getMetricsRecursive(data, customerList)
-    clv =  getCLV_Recursive(metrics)
-    return clv
-
-# Call mainRecursive function to get the CLV
-clv = mainRecursive()
-print(f"Recursive CLV Calculation: {clv}")
-
-
 def getUniqueCustomersSQL():
     """Generates a list of the unique customers from the sales database table."""
     conn, cursor = initializeDatabaseConnection()
@@ -230,3 +238,19 @@ def getCLV_IterativeSQL():
 
     clv = avg_profit_per_order * avg_order_frequency * avg_lifespan_years
     return clv
+
+def main():
+    customerList = getUniqueCustomers()
+    conn, cursor = initializeDatabaseConnection()
+    data = pd.read_sql_query('SELECT * FROM sales_data', con=conn)
+    data['ORDERDATE'] = pd.to_datetime(data['ORDERDATE'])
+    conn.close()
+
+    metrics = getMetricsRecursive(data, customerList)
+    clv_rec =  getCLV_Recursive(metrics)
+    clv_iter = getCLV_Iterative()
+    clv_iter_sql = getCLV_IterativeSQL()
+    print(f'---\nRecursive CLV: {clv_rec}\nIterative CLV: {clv_iter}\nIterative (SQL) CLV: {clv_iter_sql}')
+
+if __name__ == '__main__':
+    main()
