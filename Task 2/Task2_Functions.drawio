@@ -1,0 +1,31 @@
+<mxfile host="65bd71144e">
+    <diagram id="f3mkTPX65m6_cfgVuWSH" name="Page-1">
+        <mxGraphModel dx="1039" dy="741" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="2" value="&lt;font face=&quot;Lucida Console&quot;&gt;initializeDatabaseInstance()&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#6d8764;strokeColor=#3A5431;fontColor=#ffffff;" parent="1" vertex="1">
+                    <mxGeometry x="300" y="20" width="250" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="3" value="&lt;font face=&quot;Lucida Console&quot;&gt;getCLV_Iterative()&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#647687;strokeColor=#314354;fontColor=#ffffff;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="300" width="170" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="4" value="&lt;font face=&quot;Lucida Console&quot;&gt;getCLV_Recursive()&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#647687;strokeColor=#314354;fontColor=#ffffff;" parent="1" vertex="1">
+                    <mxGeometry x="340" y="300" width="170" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="5" value="&lt;font face=&quot;Lucida Console&quot;&gt;getCLV_SQL()&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#647687;strokeColor=#314354;fontColor=#ffffff;" parent="1" vertex="1">
+                    <mxGeometry x="620" y="300" width="170" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="6" value="&lt;font face=&quot;Lucida Console&quot;&gt;getUniqueCustomers()&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#76608a;strokeColor=#432D57;fontColor=#ffffff;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="420" width="170" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="8" value="&lt;font face=&quot;Lucida Console&quot;&gt;getMetrics()&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#76608a;strokeColor=#432D57;fontColor=#ffffff;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="550" width="170" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="10" value="&lt;font face=&quot;Lucida Console&quot;&gt;initializeDatabaseConnection()&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#6d8764;strokeColor=#3A5431;fontColor=#ffffff;" parent="1" vertex="1">
+                    <mxGeometry x="290" y="110" width="270" height="60" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
