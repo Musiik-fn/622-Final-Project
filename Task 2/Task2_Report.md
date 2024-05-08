@@ -233,15 +233,26 @@ def getCLV_Recursive(metrics):
     return avg_profit_per_order * avg_order_frequency * avg_lifespan_years
 ```
 ---
-
+Both versions of the code above produce the same results:
+```Python
+Recursive CLV: 441.03293932693344     
+Iterative CLV: 441.03293932693344
+```
 
 
 # Results 
-Present the outcomes of the performance analysis.
+Remark: The code related to the performance analysis can be found here: ([GitHub](https://github.com/Musiik-fn/622-Final-Project/blob/main/Task%202/Task2Performance.ipynb))
+
+The execution time of our functions are visualized here:
+![Image](Task2_Exeuction_Time.png)
+
+The spiking behavior likely is related to a certain point in the recursive stack once a certain number of customers have been recursed through.
 
 
 # Discussion 
-Offer insights into the benefits and limitations of each implementation style.
+For a program like this, recursion is not necessarily a good solution. Recursion is great at repetitive operations in which the present part of a sequence depends on a previous one. This operation is iterative in nature, we simply caclulate by continuous grouping arithmetic, and aggregations.
+
+However, we do believe the recursion would be useful in the CLV formula with retention rates and/or churn rates. Because customer loyalty tends to decrease over time, retention rates are used in the some applications of CLV. This rate represents the probability that a customer will continue to purchase within a period, and therefore, the summation for CLV becomes slightly more complicated. 
 
 
 # Conclusion 
