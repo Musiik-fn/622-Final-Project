@@ -233,11 +233,20 @@ def getCLV_Recursive(metrics):
     return avg_profit_per_order * avg_order_frequency * avg_lifespan_years
 ```
 ---
+
+## Testing and Validation
+
+We used our connected data base as our testing case. Our sales data table looks like the following: 
+
+![Sales Data Table](sales_data%20table%20image.png)
+
 Both versions of the code above produce the same results:
 ```Python
 Recursive CLV: 441.03293932693344     
 Iterative CLV: 441.03293932693344
 ```
+
+You can run this yourself by executing the `Task2.py` file.
 
 
 # Results 
