@@ -1,6 +1,4 @@
 # === Documentation and Testing ===
-# Code Documentation
-# TODO: Document both functions thoroughly explaining purpose, inputs, outputs, and functionality.
 # Testing
 # TODO: Write test cases for both functions to demonstrate correctness and efficiency.
 
@@ -11,8 +9,6 @@
 # TODO: Analyze and discuss differences in performance between the iterative and recursive implementations.
 
 # === Report ===
-# Introduction
-# TODO: Write an introduction in the report detailing the function and its significance in the chosen domain.
 # Methodology
 # TODO: Describe the methodology of both implementations in detail.
 # Results
@@ -238,6 +234,20 @@ def getCLV_IterativeSQL():
 
     clv = avg_profit_per_order * avg_order_frequency * avg_lifespan_years
     return clv
+
+def recursiveMain():
+    """This function is used for performance analysis of the recursive function
+    """
+    customerList = getUniqueCustomers()
+    conn, cursor = initializeDatabaseConnection()
+    data = pd.read_sql_query('SELECT * FROM sales_data', con=conn)
+    data['ORDERDATE'] = pd.to_datetime(data['ORDERDATE'])
+    conn.close()
+
+    metrics = getMetricsRecursive(data, customerList)
+    clv_rec =  getCLV_Recursive(metrics)
+
+    return clv_rec    
 
 def main():
     customerList = getUniqueCustomers()
